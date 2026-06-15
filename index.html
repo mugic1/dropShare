@@ -246,8 +246,25 @@
     }
 
     function initializeNodeEngine() {
-        if(peer) { try { peer.destroy(); } catch(e){} }
-        peer = new Peer(myId, { debug: 1 });
+    if(peer) { try { peer.destroy(); } catch(e){} }
+    
+    // Yahan hum PeerJS ko bol rahe hain ki TURN server ka use bilkul na kare (iceServers khali rakh kar)
+    // Aur direct connection ko priority de
+    peer = new Peer(myId, { 
+        debug: 1,
+        config: {
+            iceServers: [], // Isse saare external TURN/STUN servers block ho jayenge
+            iceTransportPolicy: 'all'
+        }
+    });
+    
+    peer.on('open', (id) => {
+        document.getElementById('myIdDisplay').innerText = "Node ID: " + id + " (Tap)";
+        refreshContactMatrix(); fireAutoHandshakes();
+    });
+    peer.on('connection', (incomingConn) => bindNodeEvents(incomingConn));
+    peer.on('error', (err) => console.error("PeerJS Error:", err));
+}
         peer.on('open', (id) => {
             document.getElementById('myIdDisplay').innerText = "Node ID: " + id + " (Tap)";
             refreshContactMatrix(); fireAutoHandshakes();
