@@ -87,7 +87,6 @@
             position: relative; 
             height: 100%;
             overflow: hidden;
-            width: 100%;
         }
         
         .view-header { 
@@ -105,23 +104,19 @@
         
         .nudge-btn { background: rgba(239, 68, 68, 0.08); color: var(--danger); border: 1px solid rgba(239, 68, 68, 0.15); padding: 8px 14px; border-radius: 20px; font-size: 12px; font-weight: bold; cursor: pointer; display: none; }
         
-        .bubble { max-width: 75%; width: fit-content; padding: 12px 16px; font-size: 14.5px; line-height: 1.5; word-wrap: break-word; position: relative; box-shadow: 0 2px 8px rgba(0,0,0,0.02); }
-        .b-me { align-self: flex-end; background: var(--accent); color: white; border-radius: 16px 16px 4px 16px; margin-left: auto; }
-        .b-other { align-self: flex-start; background: white; color: var(--text-dark); border-radius: 16px 16px 16px 4px; border: 1px solid var(--panel-border); margin-right: auto; }
+        .bubble { max-width: 70%; padding: 12px 16px; border-radius: 16px; font-size: 14.5px; line-height: 1.5; word-wrap: break-word; position: relative; box-shadow: 0 2px 8px rgba(0,0,0,0.02); }
+        .b-me { align-self: flex-end; background: var(--accent); color: white; border-bottom-right-radius: 4px; }
+        .b-other { align-self: flex-start; background: white; color: var(--text-dark); border-bottom-left-radius: 4px; border: 1px solid var(--panel-border); }
         .b-pending { opacity: 0.65; border: 1px dashed rgba(255,255,255,0.5); background: #4f46e5 !important; }
-        .b-time { font-size: 10px; opacity: 0.6; display: block; margin-top: 6px; }
-        .b-me .b-time { color: #e0e7ff; text-align: right; }
-        .b-other .b-time { color: var(--text-muted); text-align: left; }
+        .b-time { font-size: 10px; opacity: 0.6; display: block; text-align: right; margin-top: 6px; }
+        .b-me .b-time { color: #e0e7ff; }
+        .b-other .b-time { color: var(--text-muted); }
         
-        .stream-card { background: rgba(0, 0, 0, 0.05); padding: 10px; border-radius: 10px; margin-top: 4px; display: flex; flex-direction: column; gap: 6px; min-width: 200px; }
+        .stream-card { background: rgba(0, 0, 0, 0.05); padding: 10px; border-radius: 10px; margin-top: 4px; display: flex; flex-direction: column; gap: 6px; min-width: 180px; }
         .gauge-track { background: rgba(0,0,0,0.1); width: 100%; height: 5px; border-radius: 10px; overflow: hidden; }
         .gauge-fill { background: var(--accent); width: 0%; height: 100%; }
-        .stream-link { color: inherit; text-decoration: none; font-weight: 500; font-size: 13px; display: block; word-break: break-all; margin-top: 4px; }
-        .stream-link:hover { text-decoration: underline; }
+        .stream-link { color: inherit; text-decoration: underline; font-weight: 500; font-size: 13px; display: block; word-break: break-all; }
         
-        .media-preview { max-width: 100%; border-radius: 8px; margin-bottom: 6px; max-height: 220px; object-fit: contain; display: block; background: rgba(0,0,0,0.1); }
-        .file-size-tag { font-size: 11px; opacity: 0.7; font-weight: normal; margin-left: 4px; }
-
         .control-panel { 
             height: 75px; 
             padding: 14px 24px; 
@@ -131,9 +126,9 @@
             border-top: 1px solid var(--panel-border); 
             background: #ffffff; 
         }
-        .clip-action { background: white; border: 1px solid var(--panel-border); border-radius: 12px; width: 44px; height: 44px; font-size: 18px; cursor: pointer; display: flex; justify-content: center; align-items: center; box-shadow: 0 2px 4px rgba(0,0,0,0.02); flex-shrink: 0; }
+        .clip-action { background: white; border: 1px solid var(--panel-border); border-radius: 12px; width: 44px; height: 44px; font-size: 18px; cursor: pointer; display: flex; justify-content: center; align-items: center; box-shadow: 0 2px 4px rgba(0,0,0,0.02); }
         .type-area { flex: 1; padding: 12px 16px; border: 1px solid var(--panel-border); border-radius: 12px; outline: none; background: white; font-size: 14.5px; height: 44px; box-shadow: inset 0 1px 3px rgba(0,0,0,0.02); }
-        .emit-action { background: var(--accent); color: white; border: none; border-radius: 12px; width: 44px; height: 44px; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 16px; box-shadow: 0 2px 6px rgba(99, 102, 241, 0.3); flex-shrink: 0; }
+        .emit-action { background: var(--accent); color: white; border: none; border-radius: 12px; width: 44px; height: 44px; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 16px; box-shadow: 0 2px 6px rgba(99, 102, 241, 0.3); }
         
         #fileInput, #importFile { display: none; }
         .blank-slate { position: absolute; top:0; left:0; width:100%; height:100%; background: #f8fafc; display:flex; justify-content:center; align-items:center; color: var(--text-muted); font-size:15px; z-index: 5; text-align: center; padding: 20px; }
@@ -145,12 +140,11 @@
         }
         
         @media (max-width: 650px) {
-            .app-window { display: block; }
-            .sidebar { width: 100vw; height: 100vh; }
+            .app-window { grid-template-columns: 100% 0%; }
+            .sidebar { width: 100vw; }
             .viewport-main { 
-                position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; height: 100dvh;
-                z-index: 1000; background: #f8fafc !important; transform: translateX(100%);
-                transition: transform 0.28s cubic-bezier(0.4, 0, 0.2, 1);
+                position: absolute; top: 0; left: 0; width: 100vw; height: 100%; z-index: 100; background: #f1f5f9;
+                transform: translateX(100vw); transition: transform 0.28s cubic-bezier(0.4, 0, 0.2, 1);
             }
             .viewport-main.mobile-on { transform: translateX(0); }
             .back-nav { display: inline-block; }
@@ -202,18 +196,11 @@
 
 <script>
     if ('serviceWorker' in navigator) {
-        navigator.serviceWorker.register('sw.js').catch(() => console.log("SW missing but continuing..."));
+        navigator.serviceWorker.register('sw.js').then(() => console.log("PWA Loaded"));
     }
 
-    function formatBytes(bytes) {
-        if (bytes === 0) return '0 Bytes';
-        const k = 1024; const sizes = ['Bytes', 'KB', 'MB', 'GB'];
-        const i = Math.floor(Math.log(bytes) / Math.log(k));
-        return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
-    }
-
-    // High Optimization Chunk Size (16KB works flawless on Android/iOS WebRTC)
-    const CHUNK_MAX = 16 * 1024; 
+    // High Speed LAN Chunk Size
+    const CHUNK_MAX = 64 * 1024;
     let peer;
     let myId = localStorage.getItem('ath_node_id') || 'ath_' + Math.random().toString(36).substr(2, 9);
     localStorage.setItem('ath_node_id', myId);
@@ -231,37 +218,28 @@
         }
     }
 
-    function playNotifySound() {
-        try {
-            const ctx = new (window.AudioContext || window.webkitAudioContext)();
-            const osc = ctx.createOscillator(); const gain = ctx.createGain();
-            osc.connect(gain); gain.connect(ctx.destination);
-            osc.frequency.value = 850; osc.type = 'sine';
-            gain.gain.setValueAtTime(0, ctx.currentTime);
-            gain.gain.linearRampToValueAtTime(0.1, ctx.currentTime + 0.05);
-            gain.gain.linearRampToValueAtTime(0, ctx.currentTime + 0.15);
-            osc.start(); osc.stop(ctx.currentTime + 0.15);
-        } catch(e) {}
-    }
-
     function initializeNodeEngine() {
         if(peer) { try { peer.destroy(); } catch(e){} }
         
-        // PURE LOCAL CONFIGURATION (No External STUN/TURN servers to avoid throttle)
         peer = new Peer(myId, { 
             debug: 1,
             config: {
-                iceServers: [], 
-                iceTransportPolicy: 'all'
+                iceServers: [{ urls: 'stun:stun.l.google.com:19302' }],
+                iceCandidatePoolSize: 10
             }
         });
 
         peer.on('open', (id) => {
             document.getElementById('myIdDisplay').innerText = "Node ID: " + id + " (Tap)";
-            refreshContactMatrix(); fireAutoHandshakes();
+            refreshContactMatrix();
+            fireAutoHandshakes();
         });
+
         peer.on('connection', (incomingConn) => bindNodeEvents(incomingConn));
-        peer.on('error', (err) => console.error("PeerJS Error:", err));
+        peer.on('error', (err) => {
+            console.error("PeerJS Error:", err);
+            showToast("Handshake latency/timeout reset.");
+        });
     }
 
     function fireAutoHandshakes() {
@@ -274,7 +252,8 @@
         if(!id || !name || id === myId) return alert("Verify Peer Parameter Rules!");
         contactsBook[id] = { id, name };
         localStorage.setItem('ath_book', JSON.stringify(contactsBook));
-        refreshContactMatrix(); establishNodeLink(id);
+        refreshContactMatrix();
+        establishNodeLink(id);
         document.getElementById('addFriendName').value = ''; document.getElementById('addFriendId').value = '';
     }
 
@@ -315,15 +294,25 @@
         if(nodeDot) status ? nodeDot.classList.add('online') : nodeDot.classList.remove('online');
     }
 
-    function handleNudgeButtonVisibility(isOnline) { document.getElementById('nudgeActionBtn').style.display = isOnline ? 'none' : 'block'; }
-    function sendSystemNotificationRequest() { if(!activeNodeId) return; showToast("Trying background handshake tunnel reset..."); establishNodeLink(activeNodeId); }
+    function handleNudgeButtonVisibility(isOnline) {
+        document.getElementById('nudgeActionBtn').style.display = isOnline ? 'none' : 'block';
+    }
+
+    function sendSystemNotificationRequest() {
+        if(!activeNodeId) return;
+        showToast("Trying background handshake tunnel reset...");
+        establishNodeLink(activeNodeId);
+    }
 
     function flushOutboxQueue(peerId) {
         if (!outboxQueue[peerId] || outboxQueue[peerId].length === 0) return;
         const activeChannel = connectionsPool[peerId];
         if (activeChannel && activeChannel.open) {
-            outboxQueue[peerId].forEach((msgData) => { activeChannel.send({ type: 'txt', data: msgData.data }); });
-            outboxQueue[peerId] = []; localStorage.setItem('ath_outbox', JSON.stringify(outboxQueue));
+            outboxQueue[peerId].forEach((msgData) => {
+                activeChannel.send({ type: 'txt', data: msgData.data });
+            });
+            outboxQueue[peerId] = []; 
+            localStorage.setItem('ath_outbox', JSON.stringify(outboxQueue));
             if(peerId === activeNodeId) renderNodeArchive(); 
         }
     }
@@ -332,6 +321,7 @@
         const input = document.getElementById('textInput');
         const payload = input.value.trim();
         if(!payload || !activeNodeId) return;
+
         const activeChannel = connectionsPool[activeNodeId];
         
         if(activeChannel && activeChannel.open) {
@@ -341,7 +331,8 @@
             if(!outboxQueue[activeNodeId]) outboxQueue[activeNodeId] = [];
             outboxQueue[activeNodeId].push({ data: payload });
             localStorage.setItem('ath_outbox', JSON.stringify(outboxQueue));
-            commitAndLogBubble(activeNodeId, payload, 'b-me', true); showToast("Saved to Outbox!");
+            commitAndLogBubble(activeNodeId, payload, 'b-me', true); 
+            showToast("Saved to Outbox Cache Strategy!");
         }
         input.value = '';
     }
@@ -349,26 +340,27 @@
     function processIncomingPayload(originNodeId, payload) {
         if(payload.type === 'txt') {
             commitAndLogBubble(originNodeId, payload.data, 'b-other', false);
-            if (document.hidden) {
-                playNotifySound(); 
-                if (Notification.permission === "granted") {
-                    if ('serviceWorker' in navigator) navigator.serviceWorker.ready.then(reg => { reg.showNotification(`Aether P2P`, { body: `${contactsBook[originNodeId].name}: ${payload.data}` }); }).catch(() => { new Notification(`Aether P2P`, { body: `${contactsBook[originNodeId].name}: ${payload.data}` }); });
-                    else new Notification(`Aether P2P`, { body: `${contactsBook[originNodeId].name}: ${payload.data}` });
-                }
+            if (document.hidden && Notification.permission === "granted") {
+                new Notification(`Aether P2P`, { body: `${contactsBook[originNodeId].name}: ${payload.data}` });
             }
         }
         else if(payload.type === 'meta-start') {
-            const trackId = (originNodeId === activeNodeId) ? renderStreamTrack(payload.name, payload.size, 'b-other') : null;
-            activeAssemblers[payload.allocationId] = { name: payload.name, size: payload.size, mime: payload.mime, blocksArray: new Array(payload.blocksLength), blocksLength: payload.blocksLength, receivedCounter: 0, trackId: trackId };
+            const trackId = (originNodeId === activeNodeId) ? renderStreamTrack(payload.name, 'b-other') : null;
+            activeAssemblers[payload.allocationId] = { name: payload.name, mime: payload.mime, blocksArray: new Array(payload.blocksLength), blocksLength: payload.blocksLength, receivedCounter: 0, trackId: trackId };
         }
         else if(payload.type === 'block-data') {
             const trackerObj = activeAssemblers[payload.allocationId];
             if(trackerObj) {
                 trackerObj.blocksArray[payload.index] = payload.binary;
                 trackerObj.receivedCounter++;
-                if(trackerObj.receivedCounter % 20 === 0 || trackerObj.receivedCounter === trackerObj.blocksLength) {
+                
+                // Optimized Fix: Render progress bar UI only every 20 chunks to avoid locking main thread
+                if (trackerObj.receivedCounter % 20 === 0 || trackerObj.receivedCounter === trackerObj.blocksLength) {
                     const progressVal = Math.round((trackerObj.receivedCounter / trackerObj.blocksLength) * 100);
-                    if(trackerObj.trackId) { const fillBar = document.getElementById(`gf-${trackerObj.trackId}`); if(fillBar) fillBar.style.width = progressVal + '%'; }
+                    if(trackerObj.trackId) { 
+                        const fillBar = document.getElementById(`gf-${trackerObj.trackId}`); 
+                        if(fillBar) fillBar.style.width = progressVal + '%'; 
+                    }
                 }
             }
         }
@@ -377,10 +369,9 @@
             if(trackerObj) {
                 const compileBlob = new Blob(trackerObj.blocksArray, { type: trackerObj.mime });
                 const structuralUrl = URL.createObjectURL(compileBlob);
-                if(trackerObj.trackId) wrapStreamTrack(trackerObj.trackId, trackerObj.name, structuralUrl, trackerObj.mime, trackerObj.size);
-                logPayloadToLocalStore(originNodeId, `[File Received] ${trackerObj.name}`, 'b-other');
+                if(trackerObj.trackId) wrapStreamTrack(trackerObj.trackId, trackerObj.name, structuralUrl);
+                logPayloadToLocalStore(originNodeId, `[File Component] ${trackerObj.name}`, 'b-other');
                 delete activeAssemblers[payload.allocationId];
-                playNotifySound();
             }
         }
     }
@@ -398,11 +389,13 @@
     }
 
     function mountActiveNode(id) {
-        activeNodeId = id; document.getElementById('welcomeSlate').style.display = 'none';
+        activeNodeId = id;
+        document.getElementById('welcomeSlate').style.display = 'none';
         document.getElementById('activeNodeHeader').innerText = contactsBook[id].name + " (" + id + ")";
         document.querySelector('.viewport-main').classList.add('mobile-on');
         handleNudgeButtonVisibility(!!(connectionsPool[id] && connectionsPool[id].open));
-        refreshContactMatrix(); renderNodeArchive();
+        refreshContactMatrix();
+        renderNodeArchive();
     }
 
     function dismissMobileView() { document.querySelector('.viewport-main').classList.remove('mobile-on'); activeNodeId = null; refreshContactMatrix(); }
@@ -414,66 +407,62 @@
         event.target.value = '';
     }
 
+    // High Speed Async Pipeline Loop (No FileReader memory leak, No DOM freezing)
     async function spawnIndependentFileStreamPipeline(file, receiverNodeId) {
         const mainPipe = connectionsPool[receiverNodeId];
         if(!mainPipe || !mainPipe.open) return alert("Connection lost!");
         
         const allocationId = 'stream_' + Math.random().toString(36).substr(2, 9);
-        const gaugeId = renderStreamTrack(file.name, file.size, 'b-me');
+        const gaugeId = renderStreamTrack(file.name, 'b-me');
+
+        let readingOffset = 0; 
         const totalRequiredBlocks = Math.ceil(file.size / CHUNK_MAX); 
         
-        mainPipe.send({ type: 'meta-start', allocationId: allocationId, name: file.name, size: file.size, mime: file.type, blocksLength: totalRequiredBlocks });
+        mainPipe.send({ type: 'meta-start', allocationId: allocationId, name: file.name, mime: file.type, blocksLength: totalRequiredBlocks });
 
         for (let i = 0; i < totalRequiredBlocks; i++) {
-            if(!mainPipe.open) return; 
+            if(!mainPipe.open) break;
 
-            // High Performance Buffer Threshold (Prevents browser choking and boosts local loop speed)
+            // Adaptive backpressure: Pause loop instantly if WebRTC buffer crosses 1MB
             while (mainPipe.dataChannel.bufferedAmount > 1024 * 1024) {
-                await new Promise(r => requestAnimationFrame(r));
+                await new Promise(resolve => setTimeout(resolve, 2));
             }
 
-            const start = i * CHUNK_MAX;
-            const end = Math.min(start + CHUNK_MAX, file.size);
-            const chunk = file.slice(start, end);
-            
+            const sliceBound = file.slice(readingOffset, readingOffset + CHUNK_MAX);
             try {
-                const buffer = await chunk.arrayBuffer();
+                const buffer = await sliceBound.arrayBuffer();
                 mainPipe.send({ type: 'block-data', allocationId: allocationId, index: i, binary: buffer });
-            } catch(err) { console.error("File Read Error:", err); return; }
+            } catch (err) {
+                console.error("Chunk Stream Error:", err);
+                break;
+            }
 
-            if (i % 20 === 0 || i === totalRequiredBlocks - 1) {
-                const executionPercent = Math.round(((i + 1) / totalRequiredBlocks) * 100);
+            readingOffset += CHUNK_MAX;
+
+            // UI optimization: Update DOM every 10 chunks to save phone CPU
+            if (i % 10 === 0 || i === totalRequiredBlocks - 1) {
+                const executionPercent = Math.min(100, Math.round((readingOffset / file.size) * 100));
                 const progressFill = document.getElementById(`gf-${gaugeId}`);
                 if(progressFill) progressFill.style.width = executionPercent + '%';
             }
         }
-        
-        mainPipe.send({ type: 'meta-end', allocationId: allocationId });
-        wrapStreamTrack(gaugeId, file.name, URL.createObjectURL(file), file.type, file.size);
-        logPayloadToLocalStore(receiverNodeId, `[File Sent] ${file.name}`, 'b-me');
+
+        if(mainPipe.open) {
+            mainPipe.send({ type: 'meta-end', allocationId: allocationId });
+            wrapStreamTrack(gaugeId, file.name, URL.createObjectURL(file));
+            logPayloadToLocalStore(receiverNodeId, `[File Component] ${file.name}`, 'b-me');
+        }
     }
 
-    function renderStreamTrack(fileName, fileSize, customClass) {
+    function renderStreamTrack(fileName, customClass) {
         const container = document.getElementById('scrollerDeck'); const tokenKey = 'tk_' + Math.random().toString(36).substr(2, 9);
         const cardFrame = document.createElement('div'); cardFrame.className = `bubble ${customClass}`; cardFrame.id = tokenKey;
-        const sizeString = fileSize ? ` <span class="file-size-tag">(${formatBytes(fileSize)})</span>` : '';
-        cardFrame.innerHTML = `<div class="stream-card"><div class="stream-link" id="meta-${tokenKey}">Syncing: ${fileName}${sizeString}</div><div class="gauge-track"><div class="gauge-fill" id="gf-${tokenKey}"></div></div></div><span class="b-time">${new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}</span>`;
+        cardFrame.innerHTML = `<div class="stream-card"><div class="stream-link" id="meta-${tokenKey}">Syncing Stream: ${fileName}</div><div class="gauge-track"><div class="gauge-fill" id="gf-${tokenKey}"></div></div></div><span class="b-time">${new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}</span>`;
         container.appendChild(cardFrame); container.scrollTop = container.scrollHeight; return tokenKey;
     }
 
-    function wrapStreamTrack(targetToken, filename, finalUrl, mimeType, fileSize) {
-        const linkBlock = document.getElementById(`meta-${targetToken}`);
-        let mediaHtml = '';
-        
-        if (mimeType && mimeType.startsWith('image/')) {
-            mediaHtml = `<img src="${finalUrl}" class="media-preview" alt="Image">`;
-        } else if (mimeType && mimeType.startsWith('video/')) {
-            mediaHtml = `<video src="${finalUrl}" class="media-preview" controls></video>`;
-        }
-        
-        const sizeString = fileSize ? ` <span class="file-size-tag">(${formatBytes(fileSize)})</span>` : '';
-        
-        if(linkBlock) linkBlock.innerHTML = `${mediaHtml}<a href="${finalUrl}" download="${filename}" class="stream-link">📂 Download: ${filename}${sizeString}</a>`;
+    function wrapStreamTrack(targetToken, filename, finalUrl) {
+        const linkBlock = document.getElementById(`meta-${targetToken}`); if(linkBlock) linkBlock.innerHTML = `<a href="${finalUrl}" download="${filename}" class="stream-link">📂 Download File: ${filename}</a>`;
         const trackerBar = document.getElementById(`gf-${targetToken}`); if(trackerBar) trackerBar.parentElement.style.display = 'none';
     }
 
@@ -533,19 +522,32 @@
     }
 
     function importAetherDatabase(event) {
-        const contextFile = event.target.files[0]; if (!contextFile) return; const asyncReader = new FileReader();
+        const contextFile = event.target.files[0]; if (!contextFile) return;
+        const asyncReader = new FileReader();
         asyncReader.onload = function(e) {
             try {
                 const parsedObject = JSON.parse(e.target.result);
                 if (parsedObject.version !== "3.0.0" || !parsedObject.nodeId) throw new Error("Invalid signature format.");
+                
                 localStorage.setItem('ath_node_id', parsedObject.nodeId);
                 if(parsedObject.contacts) localStorage.setItem('ath_book', parsedObject.contacts);
                 if(parsedObject.chats) localStorage.setItem('ath_archive', parsedObject.chats);
                 if(parsedObject.outbox) localStorage.setItem('ath_outbox', parsedObject.outbox);
-                myId = parsedObject.nodeId; contactsBook = JSON.parse(localStorage.getItem('ath_book')) || {}; archiveStore = JSON.parse(localStorage.getItem('ath_archive')) || {}; outboxQueue = JSON.parse(localStorage.getItem('ath_outbox')) || {};
-                activeNodeId = null; document.getElementById('welcomeSlate').style.display = 'flex'; connectionsPool = {};
-                showToast("Database Restored. Initializing sync cluster..."); initializeNodeEngine();
-            } catch (err) { alert("Core System: Corrupted or Unsupported `.json` configuration file structure."); }
+
+                myId = parsedObject.nodeId;
+                contactsBook = JSON.parse(localStorage.getItem('ath_book')) || {};
+                archiveStore = JSON.parse(localStorage.getItem('ath_archive')) || {};
+                outboxQueue = JSON.parse(localStorage.getItem('ath_outbox')) || {};
+                
+                activeNodeId = null;
+                document.getElementById('welcomeSlate').style.display = 'flex';
+                connectionsPool = {};
+                
+                showToast("Database Restored. Initializing sync cluster...");
+                initializeNodeEngine();
+            } catch (err) {
+                alert("Core System: Corrupted or Unsupported `.json` configuration file structure.");
+            }
         };
         asyncReader.readAsText(contextFile); event.target.value = '';
     }
