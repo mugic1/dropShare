@@ -119,7 +119,6 @@
         .stream-link { color: inherit; text-decoration: none; font-weight: 500; font-size: 13px; display: block; word-break: break-all; margin-top: 4px; }
         .stream-link:hover { text-decoration: underline; }
         
-        /* Media Previews CSS */
         .media-preview { max-width: 100%; border-radius: 8px; margin-bottom: 6px; max-height: 220px; object-fit: contain; display: block; background: rgba(0,0,0,0.1); }
         .file-size-tag { font-size: 11px; opacity: 0.7; font-weight: normal; margin-left: 4px; }
 
@@ -206,7 +205,6 @@
         navigator.serviceWorker.register('sw.js').catch(() => console.log("SW missing but continuing..."));
     }
 
-    // Size Formatter
     function formatBytes(bytes) {
         if (bytes === 0) return '0 Bytes';
         const k = 1024; const sizes = ['Bytes', 'KB', 'MB', 'GB'];
@@ -214,7 +212,8 @@
         return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
     }
 
-    const CHUNK_MAX = 64 * 1024; // 64KB ensures max stability in WebRTC buffers
+    // High Optimization Chunk Size (16KB works flawless on Android/iOS WebRTC)
+    const CHUNK_MAX = 16 * 1024; 
     let peer;
     let myId = localStorage.getItem('ath_node_id') || 'ath_' + Math.random().toString(36).substr(2, 9);
     localStorage.setItem('ath_node_id', myId);
@@ -246,25 +245,17 @@
     }
 
     function initializeNodeEngine() {
-    if(peer) { try { peer.destroy(); } catch(e){} }
-    
-    // Yahan hum PeerJS ko bol rahe hain ki TURN server ka use bilkul na kare (iceServers khali rakh kar)
-    // Aur direct connection ko priority de
-    peer = new Peer(myId, { 
-        debug: 1,
-        config: {
-            iceServers: [], // Isse saare external TURN/STUN servers block ho jayenge
-            iceTransportPolicy: 'all'
-        }
-    });
-    
-    peer.on('open', (id) => {
-        document.getElementById('myIdDisplay').innerText = "Node ID: " + id + " (Tap)";
-        refreshContactMatrix(); fireAutoHandshakes();
-    });
-    peer.on('connection', (incomingConn) => bindNodeEvents(incomingConn));
-    peer.on('error', (err) => console.error("PeerJS Error:", err));
-}
+        if(peer) { try { peer.destroy(); } catch(e){} }
+        
+        // PURE LOCAL CONFIGURATION (No External STUN/TURN servers to avoid throttle)
+        peer = new Peer(myId, { 
+            debug: 1,
+            config: {
+                iceServers: [], 
+                iceTransportPolicy: 'all'
+            }
+        });
+
         peer.on('open', (id) => {
             document.getElementById('myIdDisplay').innerText = "Node ID: " + id + " (Tap)";
             refreshContactMatrix(); fireAutoHandshakes();
@@ -375,7 +366,7 @@
             if(trackerObj) {
                 trackerObj.blocksArray[payload.index] = payload.binary;
                 trackerObj.receivedCounter++;
-                if(trackerObj.receivedCounter % 5 === 0 || trackerObj.receivedCounter === trackerObj.blocksLength) {
+                if(trackerObj.receivedCounter % 20 === 0 || trackerObj.receivedCounter === trackerObj.blocksLength) {
                     const progressVal = Math.round((trackerObj.receivedCounter / trackerObj.blocksLength) * 100);
                     if(trackerObj.trackId) { const fillBar = document.getElementById(`gf-${trackerObj.trackId}`); if(fillBar) fillBar.style.width = progressVal + '%'; }
                 }
@@ -436,9 +427,9 @@
         for (let i = 0; i < totalRequiredBlocks; i++) {
             if(!mainPipe.open) return; 
 
-            // Optimized buffer check (Lower threshold = smoother flow)
-            while (mainPipe.dataChannel.bufferedAmount > 2 * 1024 * 1024) {
-                await new Promise(r => setTimeout(r, 5));
+            // High Performance Buffer Threshold (Prevents browser choking and boosts local loop speed)
+            while (mainPipe.dataChannel.bufferedAmount > 1024 * 1024) {
+                await new Promise(r => requestAnimationFrame(r));
             }
 
             const start = i * CHUNK_MAX;
@@ -450,7 +441,7 @@
                 mainPipe.send({ type: 'block-data', allocationId: allocationId, index: i, binary: buffer });
             } catch(err) { console.error("File Read Error:", err); return; }
 
-            if (i % 5 === 0 || i === totalRequiredBlocks - 1) {
+            if (i % 20 === 0 || i === totalRequiredBlocks - 1) {
                 const executionPercent = Math.round(((i + 1) / totalRequiredBlocks) * 100);
                 const progressFill = document.getElementById(`gf-${gaugeId}`);
                 if(progressFill) progressFill.style.width = executionPercent + '%';
@@ -563,4 +554,3 @@
 </script>
 </body>
 </html>
-
