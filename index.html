@@ -105,8 +105,7 @@
         
         .nudge-btn { background: rgba(239, 68, 68, 0.08); color: var(--danger); border: 1px solid rgba(239, 68, 68, 0.15); padding: 8px 14px; border-radius: 20px; font-size: 12px; font-weight: bold; cursor: pointer; display: none; }
         
-        /* Chat Bubbles Engine Fixed for All Devices */
-        .bubble { max-width: 70%; width: fit-content; padding: 12px 16px; font-size: 14.5px; line-height: 1.5; word-wrap: break-word; position: relative; box-shadow: 0 2px 8px rgba(0,0,0,0.02); }
+        .bubble { max-width: 75%; width: fit-content; padding: 12px 16px; font-size: 14.5px; line-height: 1.5; word-wrap: break-word; position: relative; box-shadow: 0 2px 8px rgba(0,0,0,0.02); }
         .b-me { align-self: flex-end; background: var(--accent); color: white; border-radius: 16px 16px 4px 16px; margin-left: auto; }
         .b-other { align-self: flex-start; background: white; color: var(--text-dark); border-radius: 16px 16px 16px 4px; border: 1px solid var(--panel-border); margin-right: auto; }
         .b-pending { opacity: 0.65; border: 1px dashed rgba(255,255,255,0.5); background: #4f46e5 !important; }
@@ -114,11 +113,16 @@
         .b-me .b-time { color: #e0e7ff; text-align: right; }
         .b-other .b-time { color: var(--text-muted); text-align: left; }
         
-        .stream-card { background: rgba(0, 0, 0, 0.05); padding: 10px; border-radius: 10px; margin-top: 4px; display: flex; flex-direction: column; gap: 6px; min-width: 180px; }
+        .stream-card { background: rgba(0, 0, 0, 0.05); padding: 10px; border-radius: 10px; margin-top: 4px; display: flex; flex-direction: column; gap: 6px; min-width: 200px; }
         .gauge-track { background: rgba(0,0,0,0.1); width: 100%; height: 5px; border-radius: 10px; overflow: hidden; }
         .gauge-fill { background: var(--accent); width: 0%; height: 100%; }
-        .stream-link { color: inherit; text-decoration: underline; font-weight: 500; font-size: 13px; display: block; word-break: break-all; }
+        .stream-link { color: inherit; text-decoration: none; font-weight: 500; font-size: 13px; display: block; word-break: break-all; margin-top: 4px; }
+        .stream-link:hover { text-decoration: underline; }
         
+        /* Media Previews CSS */
+        .media-preview { max-width: 100%; border-radius: 8px; margin-bottom: 6px; max-height: 220px; object-fit: contain; display: block; background: rgba(0,0,0,0.1); }
+        .file-size-tag { font-size: 11px; opacity: 0.7; font-weight: normal; margin-left: 4px; }
+
         .control-panel { 
             height: 75px; 
             padding: 14px 24px; 
@@ -137,25 +141,16 @@
         .toast-popup { position: fixed; bottom: 95px; left: 50%; transform: translateX(-50%); background: var(--text-dark); color: white; padding: 12px 24px; border-radius: 12px; display: none; font-size: 13px; z-index: 5000; box-shadow: 0 10px 30px rgba(0,0,0,0.15); font-weight: 500; }
         .back-nav { display: none; margin-right: 14px; cursor: pointer; font-size: 20px; font-weight: bold; }
         
-        /* Tablet Fixes */
         @media (max-width: 900px) {
             .app-window { grid-template-columns: 300px 1fr; }
         }
         
-        /* Mobile Overlap Fixed Completely */
         @media (max-width: 650px) {
             .app-window { display: block; }
             .sidebar { width: 100vw; height: 100vh; }
             .viewport-main { 
-                position: fixed;
-                top: 0;
-                left: 0;
-                width: 100vw;
-                height: 100vh;
-                height: 100dvh;
-                z-index: 1000;
-                background: #f8fafc !important; /* Solid background applied */
-                transform: translateX(100%);
+                position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; height: 100dvh;
+                z-index: 1000; background: #f8fafc !important; transform: translateX(100%);
                 transition: transform 0.28s cubic-bezier(0.4, 0, 0.2, 1);
             }
             .viewport-main.mobile-on { transform: translateX(0); }
@@ -211,7 +206,15 @@
         navigator.serviceWorker.register('sw.js').catch(() => console.log("SW missing but continuing..."));
     }
 
-    const CHUNK_MAX = 128 * 1024; // 128KB Chunks for much higher speed
+    // Size Formatter
+    function formatBytes(bytes) {
+        if (bytes === 0) return '0 Bytes';
+        const k = 1024; const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+        const i = Math.floor(Math.log(bytes) / Math.log(k));
+        return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+    }
+
+    const CHUNK_MAX = 64 * 1024; // 64KB ensures max stability in WebRTC buffers
     let peer;
     let myId = localStorage.getItem('ath_node_id') || 'ath_' + Math.random().toString(36).substr(2, 9);
     localStorage.setItem('ath_node_id', myId);
@@ -229,12 +232,10 @@
         }
     }
 
-    // Audio Notification Alert Generator
     function playNotifySound() {
         try {
             const ctx = new (window.AudioContext || window.webkitAudioContext)();
-            const osc = ctx.createOscillator();
-            const gain = ctx.createGain();
+            const osc = ctx.createOscillator(); const gain = ctx.createGain();
             osc.connect(gain); gain.connect(ctx.destination);
             osc.frequency.value = 850; osc.type = 'sine';
             gain.gain.setValueAtTime(0, ctx.currentTime);
@@ -246,19 +247,13 @@
 
     function initializeNodeEngine() {
         if(peer) { try { peer.destroy(); } catch(e){} }
-        
         peer = new Peer(myId, { debug: 1 });
-
         peer.on('open', (id) => {
             document.getElementById('myIdDisplay').innerText = "Node ID: " + id + " (Tap)";
-            refreshContactMatrix();
-            fireAutoHandshakes();
+            refreshContactMatrix(); fireAutoHandshakes();
         });
-
         peer.on('connection', (incomingConn) => bindNodeEvents(incomingConn));
-        peer.on('error', (err) => {
-            console.error("PeerJS Handshake Flag Error:", err);
-        });
+        peer.on('error', (err) => console.error("PeerJS Error:", err));
     }
 
     function fireAutoHandshakes() {
@@ -271,8 +266,7 @@
         if(!id || !name || id === myId) return alert("Verify Peer Parameter Rules!");
         contactsBook[id] = { id, name };
         localStorage.setItem('ath_book', JSON.stringify(contactsBook));
-        refreshContactMatrix();
-        establishNodeLink(id);
+        refreshContactMatrix(); establishNodeLink(id);
         document.getElementById('addFriendName').value = ''; document.getElementById('addFriendId').value = '';
     }
 
@@ -313,25 +307,15 @@
         if(nodeDot) status ? nodeDot.classList.add('online') : nodeDot.classList.remove('online');
     }
 
-    function handleNudgeButtonVisibility(isOnline) {
-        document.getElementById('nudgeActionBtn').style.display = isOnline ? 'none' : 'block';
-    }
-
-    function sendSystemNotificationRequest() {
-        if(!activeNodeId) return;
-        showToast("Trying background handshake tunnel reset...");
-        establishNodeLink(activeNodeId);
-    }
+    function handleNudgeButtonVisibility(isOnline) { document.getElementById('nudgeActionBtn').style.display = isOnline ? 'none' : 'block'; }
+    function sendSystemNotificationRequest() { if(!activeNodeId) return; showToast("Trying background handshake tunnel reset..."); establishNodeLink(activeNodeId); }
 
     function flushOutboxQueue(peerId) {
         if (!outboxQueue[peerId] || outboxQueue[peerId].length === 0) return;
         const activeChannel = connectionsPool[peerId];
         if (activeChannel && activeChannel.open) {
-            outboxQueue[peerId].forEach((msgData) => {
-                activeChannel.send({ type: 'txt', data: msgData.data });
-            });
-            outboxQueue[peerId] = []; 
-            localStorage.setItem('ath_outbox', JSON.stringify(outboxQueue));
+            outboxQueue[peerId].forEach((msgData) => { activeChannel.send({ type: 'txt', data: msgData.data }); });
+            outboxQueue[peerId] = []; localStorage.setItem('ath_outbox', JSON.stringify(outboxQueue));
             if(peerId === activeNodeId) renderNodeArchive(); 
         }
     }
@@ -340,7 +324,6 @@
         const input = document.getElementById('textInput');
         const payload = input.value.trim();
         if(!payload || !activeNodeId) return;
-
         const activeChannel = connectionsPool[activeNodeId];
         
         if(activeChannel && activeChannel.open) {
@@ -350,8 +333,7 @@
             if(!outboxQueue[activeNodeId]) outboxQueue[activeNodeId] = [];
             outboxQueue[activeNodeId].push({ data: payload });
             localStorage.setItem('ath_outbox', JSON.stringify(outboxQueue));
-            commitAndLogBubble(activeNodeId, payload, 'b-me', true); 
-            showToast("Saved to Outbox Cache Strategy!");
+            commitAndLogBubble(activeNodeId, payload, 'b-me', true); showToast("Saved to Outbox!");
         }
         input.value = '';
     }
@@ -359,33 +341,23 @@
     function processIncomingPayload(originNodeId, payload) {
         if(payload.type === 'txt') {
             commitAndLogBubble(originNodeId, payload.data, 'b-other', false);
-            
-            // Advanced Push/Audio Notification Setup
             if (document.hidden) {
-                playNotifySound(); // Play Audio Beep
+                playNotifySound(); 
                 if (Notification.permission === "granted") {
-                    if ('serviceWorker' in navigator) {
-                        navigator.serviceWorker.ready.then(reg => {
-                            reg.showNotification(`Aether P2P`, { body: `${contactsBook[originNodeId].name}: ${payload.data}` });
-                        }).catch(() => { 
-                            new Notification(`Aether P2P`, { body: `${contactsBook[originNodeId].name}: ${payload.data}` }); 
-                        });
-                    } else {
-                        new Notification(`Aether P2P`, { body: `${contactsBook[originNodeId].name}: ${payload.data}` });
-                    }
+                    if ('serviceWorker' in navigator) navigator.serviceWorker.ready.then(reg => { reg.showNotification(`Aether P2P`, { body: `${contactsBook[originNodeId].name}: ${payload.data}` }); }).catch(() => { new Notification(`Aether P2P`, { body: `${contactsBook[originNodeId].name}: ${payload.data}` }); });
+                    else new Notification(`Aether P2P`, { body: `${contactsBook[originNodeId].name}: ${payload.data}` });
                 }
             }
         }
         else if(payload.type === 'meta-start') {
-            const trackId = (originNodeId === activeNodeId) ? renderStreamTrack(payload.name, 'b-other') : null;
-            activeAssemblers[payload.allocationId] = { name: payload.name, mime: payload.mime, blocksArray: new Array(payload.blocksLength), blocksLength: payload.blocksLength, receivedCounter: 0, trackId: trackId };
+            const trackId = (originNodeId === activeNodeId) ? renderStreamTrack(payload.name, payload.size, 'b-other') : null;
+            activeAssemblers[payload.allocationId] = { name: payload.name, size: payload.size, mime: payload.mime, blocksArray: new Array(payload.blocksLength), blocksLength: payload.blocksLength, receivedCounter: 0, trackId: trackId };
         }
         else if(payload.type === 'block-data') {
             const trackerObj = activeAssemblers[payload.allocationId];
             if(trackerObj) {
                 trackerObj.blocksArray[payload.index] = payload.binary;
                 trackerObj.receivedCounter++;
-                // Optimize UI Update frequency to reduce CPU load
                 if(trackerObj.receivedCounter % 5 === 0 || trackerObj.receivedCounter === trackerObj.blocksLength) {
                     const progressVal = Math.round((trackerObj.receivedCounter / trackerObj.blocksLength) * 100);
                     if(trackerObj.trackId) { const fillBar = document.getElementById(`gf-${trackerObj.trackId}`); if(fillBar) fillBar.style.width = progressVal + '%'; }
@@ -397,10 +369,10 @@
             if(trackerObj) {
                 const compileBlob = new Blob(trackerObj.blocksArray, { type: trackerObj.mime });
                 const structuralUrl = URL.createObjectURL(compileBlob);
-                if(trackerObj.trackId) wrapStreamTrack(trackerObj.trackId, trackerObj.name, structuralUrl);
+                if(trackerObj.trackId) wrapStreamTrack(trackerObj.trackId, trackerObj.name, structuralUrl, trackerObj.mime, trackerObj.size);
                 logPayloadToLocalStore(originNodeId, `[File Received] ${trackerObj.name}`, 'b-other');
                 delete activeAssemblers[payload.allocationId];
-                playNotifySound(); // Audio alert on file finish
+                playNotifySound();
             }
         }
     }
@@ -418,13 +390,11 @@
     }
 
     function mountActiveNode(id) {
-        activeNodeId = id;
-        document.getElementById('welcomeSlate').style.display = 'none';
+        activeNodeId = id; document.getElementById('welcomeSlate').style.display = 'none';
         document.getElementById('activeNodeHeader').innerText = contactsBook[id].name + " (" + id + ")";
         document.querySelector('.viewport-main').classList.add('mobile-on');
         handleNudgeButtonVisibility(!!(connectionsPool[id] && connectionsPool[id].open));
-        refreshContactMatrix();
-        renderNodeArchive();
+        refreshContactMatrix(); renderNodeArchive();
     }
 
     function dismissMobileView() { document.querySelector('.viewport-main').classList.remove('mobile-on'); activeNodeId = null; refreshContactMatrix(); }
@@ -436,23 +406,22 @@
         event.target.value = '';
     }
 
-    /* Fixed Optimization: Async/Await Loop for Maximum File Transfer Speed */
     async function spawnIndependentFileStreamPipeline(file, receiverNodeId) {
         const mainPipe = connectionsPool[receiverNodeId];
         if(!mainPipe || !mainPipe.open) return alert("Connection lost!");
         
         const allocationId = 'stream_' + Math.random().toString(36).substr(2, 9);
-        const gaugeId = renderStreamTrack(file.name, 'b-me');
-
+        const gaugeId = renderStreamTrack(file.name, file.size, 'b-me');
         const totalRequiredBlocks = Math.ceil(file.size / CHUNK_MAX); 
-        mainPipe.send({ type: 'meta-start', allocationId: allocationId, name: file.name, mime: file.type, blocksLength: totalRequiredBlocks });
+        
+        mainPipe.send({ type: 'meta-start', allocationId: allocationId, name: file.name, size: file.size, mime: file.type, blocksLength: totalRequiredBlocks });
 
         for (let i = 0; i < totalRequiredBlocks; i++) {
-            if(!mainPipe.open) return; // Drop if connection lost
+            if(!mainPipe.open) return; 
 
-            // Buffer Overflow Protection: Pause only if buffer exceeds 8MB
-            while (mainPipe.dataChannel.bufferedAmount > 8 * 1024 * 1024) {
-                await new Promise(r => setTimeout(r, 20));
+            // Optimized buffer check (Lower threshold = smoother flow)
+            while (mainPipe.dataChannel.bufferedAmount > 2 * 1024 * 1024) {
+                await new Promise(r => setTimeout(r, 5));
             }
 
             const start = i * CHUNK_MAX;
@@ -464,7 +433,6 @@
                 mainPipe.send({ type: 'block-data', allocationId: allocationId, index: i, binary: buffer });
             } catch(err) { console.error("File Read Error:", err); return; }
 
-            // Throttled UI update
             if (i % 5 === 0 || i === totalRequiredBlocks - 1) {
                 const executionPercent = Math.round(((i + 1) / totalRequiredBlocks) * 100);
                 const progressFill = document.getElementById(`gf-${gaugeId}`);
@@ -473,19 +441,31 @@
         }
         
         mainPipe.send({ type: 'meta-end', allocationId: allocationId });
-        wrapStreamTrack(gaugeId, file.name, URL.createObjectURL(file));
+        wrapStreamTrack(gaugeId, file.name, URL.createObjectURL(file), file.type, file.size);
         logPayloadToLocalStore(receiverNodeId, `[File Sent] ${file.name}`, 'b-me');
     }
 
-    function renderStreamTrack(fileName, customClass) {
+    function renderStreamTrack(fileName, fileSize, customClass) {
         const container = document.getElementById('scrollerDeck'); const tokenKey = 'tk_' + Math.random().toString(36).substr(2, 9);
         const cardFrame = document.createElement('div'); cardFrame.className = `bubble ${customClass}`; cardFrame.id = tokenKey;
-        cardFrame.innerHTML = `<div class="stream-card"><div class="stream-link" id="meta-${tokenKey}">Syncing Stream: ${fileName}</div><div class="gauge-track"><div class="gauge-fill" id="gf-${tokenKey}"></div></div></div><span class="b-time">${new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}</span>`;
+        const sizeString = fileSize ? ` <span class="file-size-tag">(${formatBytes(fileSize)})</span>` : '';
+        cardFrame.innerHTML = `<div class="stream-card"><div class="stream-link" id="meta-${tokenKey}">Syncing: ${fileName}${sizeString}</div><div class="gauge-track"><div class="gauge-fill" id="gf-${tokenKey}"></div></div></div><span class="b-time">${new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}</span>`;
         container.appendChild(cardFrame); container.scrollTop = container.scrollHeight; return tokenKey;
     }
 
-    function wrapStreamTrack(targetToken, filename, finalUrl) {
-        const linkBlock = document.getElementById(`meta-${targetToken}`); if(linkBlock) linkBlock.innerHTML = `<a href="${finalUrl}" download="${filename}" class="stream-link">📂 Download File: ${filename}</a>`;
+    function wrapStreamTrack(targetToken, filename, finalUrl, mimeType, fileSize) {
+        const linkBlock = document.getElementById(`meta-${targetToken}`);
+        let mediaHtml = '';
+        
+        if (mimeType && mimeType.startsWith('image/')) {
+            mediaHtml = `<img src="${finalUrl}" class="media-preview" alt="Image">`;
+        } else if (mimeType && mimeType.startsWith('video/')) {
+            mediaHtml = `<video src="${finalUrl}" class="media-preview" controls></video>`;
+        }
+        
+        const sizeString = fileSize ? ` <span class="file-size-tag">(${formatBytes(fileSize)})</span>` : '';
+        
+        if(linkBlock) linkBlock.innerHTML = `${mediaHtml}<a href="${finalUrl}" download="${filename}" class="stream-link">📂 Download: ${filename}${sizeString}</a>`;
         const trackerBar = document.getElementById(`gf-${targetToken}`); if(trackerBar) trackerBar.parentElement.style.display = 'none';
     }
 
@@ -538,49 +518,26 @@
     function showToast(infoText) { const box = document.getElementById('systemToast'); box.innerText = infoText; box.style.display = 'block'; setTimeout(() => box.style.display = 'none', 1800); }
 
     function exportAetherDatabase() {
-        const backupDataObj = {
-            version: "3.0.0",
-            timestamp: Date.now(),
-            nodeId: localStorage.getItem('ath_node_id'),
-            contacts: localStorage.getItem('ath_book'),
-            chats: localStorage.getItem('ath_archive'),
-            outbox: localStorage.getItem('ath_outbox')
-        };
+        const backupDataObj = { version: "3.0.0", timestamp: Date.now(), nodeId: localStorage.getItem('ath_node_id'), contacts: localStorage.getItem('ath_book'), chats: localStorage.getItem('ath_archive'), outbox: localStorage.getItem('ath_outbox') };
         const stringifiedBlob = new Blob([JSON.stringify(backupDataObj, null, 2)], { type: "application/json" });
-        const temporaryLink = document.createElement('a');
-        temporaryLink.href = URL.createObjectURL(stringifiedBlob);
-        temporaryLink.download = `Aether_Backup_${new Date().toISOString().slice(0,10)}.json`;
-        document.body.appendChild(temporaryLink); temporaryLink.click(); document.body.removeChild(temporaryLink);
-        showToast("Database Exported Successfully!");
+        const temporaryLink = document.createElement('a'); temporaryLink.href = URL.createObjectURL(stringifiedBlob);
+        temporaryLink.download = `Aether_Backup_${new Date().toISOString().slice(0,10)}.json`; document.body.appendChild(temporaryLink); temporaryLink.click(); document.body.removeChild(temporaryLink); showToast("Database Exported Successfully!");
     }
 
     function importAetherDatabase(event) {
-        const contextFile = event.target.files[0]; if (!contextFile) return;
-        const asyncReader = new FileReader();
+        const contextFile = event.target.files[0]; if (!contextFile) return; const asyncReader = new FileReader();
         asyncReader.onload = function(e) {
             try {
                 const parsedObject = JSON.parse(e.target.result);
                 if (parsedObject.version !== "3.0.0" || !parsedObject.nodeId) throw new Error("Invalid signature format.");
-                
                 localStorage.setItem('ath_node_id', parsedObject.nodeId);
                 if(parsedObject.contacts) localStorage.setItem('ath_book', parsedObject.contacts);
                 if(parsedObject.chats) localStorage.setItem('ath_archive', parsedObject.chats);
                 if(parsedObject.outbox) localStorage.setItem('ath_outbox', parsedObject.outbox);
-
-                myId = parsedObject.nodeId;
-                contactsBook = JSON.parse(localStorage.getItem('ath_book')) || {};
-                archiveStore = JSON.parse(localStorage.getItem('ath_archive')) || {};
-                outboxQueue = JSON.parse(localStorage.getItem('ath_outbox')) || {};
-                
-                activeNodeId = null;
-                document.getElementById('welcomeSlate').style.display = 'flex';
-                connectionsPool = {};
-                
-                showToast("Database Restored. Initializing sync cluster...");
-                initializeNodeEngine();
-            } catch (err) {
-                alert("Core System: Corrupted or Unsupported `.json` configuration file structure.");
-            }
+                myId = parsedObject.nodeId; contactsBook = JSON.parse(localStorage.getItem('ath_book')) || {}; archiveStore = JSON.parse(localStorage.getItem('ath_archive')) || {}; outboxQueue = JSON.parse(localStorage.getItem('ath_outbox')) || {};
+                activeNodeId = null; document.getElementById('welcomeSlate').style.display = 'flex'; connectionsPool = {};
+                showToast("Database Restored. Initializing sync cluster..."); initializeNodeEngine();
+            } catch (err) { alert("Core System: Corrupted or Unsupported `.json` configuration file structure."); }
         };
         asyncReader.readAsText(contextFile); event.target.value = '';
     }
@@ -589,3 +546,4 @@
 </script>
 </body>
 </html>
+
