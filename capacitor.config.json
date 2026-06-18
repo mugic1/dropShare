@@ -1,6 +1,6 @@
 {
-  "appId": "com.mycompany.mygithubapp",
-  "appName": "My GitHub App",
+  "appId": "com.mycompany.githubpagesapp",
+  "appName": "Aether P2P App",
   "webDir": ".",
   "bundledWebRuntime": false
 }
